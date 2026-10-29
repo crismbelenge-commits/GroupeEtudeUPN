@@ -50,6 +50,46 @@
             </div>
         </div>
 
+        <!-- Gestion des Demandes d'Inscription (Admin seulement) -->
+        {% if request.user.is_superuser %}
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card p-4 shadow-sm border-0 bg-body border-start border-warning border-4">
+                    <h5 class="fw-bold mb-3 text-warning">⏳ Demandes d'inscription en attente</h5>
+                    {% if demandes_attente %}
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle small mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Nom</th>
+                                        <th>Email</th>
+                                        <th>Date de la demande</th>
+                                        <th class="text-end">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for d in demandes_attente %}
+                                    <tr>
+                                        <td class="fw-semibold">{{ d.nom }}</td>
+                                        <td>{{ d.email }}</td>
+                                        <td class="text-muted">{{ d.date_demande|date:"d/m/Y H:i" }}</td>
+                                        <td class="text-end">
+                                            <a href="{% url 'comptes:valider_demande' d.id %}" class="btn btn-success btn-sm py-0 px-2">Valider ✅</a>
+                                            <a href="{% url 'comptes:refuser_demande' d.id %}" class="btn btn-danger btn-sm py-0 px-2 ms-1">Refuser ❌</a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted small mb-0">Aucune demande d'inscription en attente pour le moment.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
         <!-- Caisse (Admin seulement) -->
         {% if request.user.is_superuser %}
         <div class="row mb-4">

@@ -21,6 +21,20 @@ urlpatterns = [
     ),
     path("inscription/", views.demander_inscription, name="demander_inscription"),
     path("tableau-de-bord/", views.tableau_de_bord, name="tableau_de_bord"),
+    
+    # Routes de validation des inscriptions
+    path(
+        "demande/valider/<int:demande_id>/",
+        views.valider_demande,
+        name="valider_demande",
+    ),
+    path(
+        "demande/refuser/<int:demande_id>/",
+        views.refuser_demande,
+        name="refuser_demande",
+    ),
+
+    # Routes de suppression
     path(
         "supprimer-document/<int:doc_id>/",
         views.supprimer_document,
