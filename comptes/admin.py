@@ -1,19 +1,27 @@
 from django.contrib import admin
 from .models import (
-    Annonce,
+    ProfilEtudiant,
     DemandeInscription,
-    DepenseCaisse,
+    Annonce,
+    FlashInfo,
+    AnnonceUniversitaire,
     DocumentPartage,
-    MessageChat,
-    PaiementCaisse,
+    LivreBibliotheque,
     PhotoGalerie,
-    Presence,
+    MessageChat,
     TacheGroupe,
+    Presence,
+    PaiementCaisse,
+    DepenseCaisse,
 )
 
+admin.site.register(ProfilEtudiant)
 admin.site.register(DemandeInscription)
 admin.site.register(Annonce)
+admin.site.register(FlashInfo)
+admin.site.register(AnnonceUniversitaire)
 admin.site.register(DocumentPartage)
+admin.site.register(LivreBibliotheque)
 admin.site.register(PhotoGalerie)
 admin.site.register(MessageChat)
 admin.site.register(TacheGroupe)

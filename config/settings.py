@@ -93,7 +93,8 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),
 ]
 
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+# Static files (CSS, JavaScript, Images)
+STATIC_URL = '/static/'
 
-# Default primary key field type
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+# Utilisation de STATIC_ROOT pour la production sur Render (sans nécessiter de dossier static global)
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
