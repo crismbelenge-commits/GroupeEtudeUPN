@@ -36,6 +36,26 @@ def demander_inscription(request):
 
 
 @login_required(login_url="comptes:connexion")
+def valider_demande(request, demande_id):
+    if request.user.is_superuser:
+        demande = get_object_or_404(DemandeInscription, id=demande_id)
+        demande.statut = DemandeInscription.Statut.ACCEPTEE
+        demande.validee = True
+        demande.save()
+    return redirect("comptes:tableau_de_bord")
+
+
+@login_required(login_url="comptes:connexion")
+def refuser_demande(request, demande_id):
+    if request.user.is_superuser:
+        demande = get_object_or_404(DemandeInscription, id=demande_id)
+        demande.statut = DemandeInscription.Statut.REFUSEE
+        demande.validee = False
+        demande.save()
+    return redirect("comptes:tableau_de_bord")
+
+
+@login_required(login_url="comptes:connexion")
 def tableau_de_bord(request):
     profil, _ = ProfilEtudiant.objects.get_or_create(user=request.user)
 
@@ -152,6 +172,9 @@ def tableau_de_bord(request):
         "tous_les_membres": User.objects.all(),
         "profils_etudiants": ProfilEtudiant.objects.all(),
         "reunions": Presence.objects.all().order_by("-date_reunion"),
+        "demandes_attente": DemandeInscription.objects.filter(
+            statut=DemandeInscription.Statut.EN_ATTENTE
+        ),
     }
 
     if request.user.is_superuser:
