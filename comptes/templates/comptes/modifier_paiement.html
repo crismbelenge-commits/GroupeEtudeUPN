@@ -1,0 +1,51 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modifier un Paiement — Groupe Étude UPN</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'comptes/css/style.css' %}">
+</head>
+<body class="bg-light d-flex align-items-center justify-content-center" style="height: 100vh;">
+    <div class="card card-pro p-4 w-100 shadow-sm" style="max-width: 480px;">
+        <h4 class="fw-bold mb-3 text-dark">Modifier le versement</h4>
+        <p class="text-muted small mb-4">Membre : <strong>{{ paiement.membre.username }}</strong></p>
+
+        <form method="post">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label class="form-label small fw-semibold">Montant (FC)</label>
+                <input type="number" step="0.01" name="montant" value="{{ paiement.montant }}" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label small fw-semibold">Motif / Type de paiement</label>
+                <select name="type_paiement" class="form-select">
+                    <option value="SEMAINE_1" {% if paiement.type_paiement == "SEMAINE_1" %}selected{% endif %}>Semaine 1</option>
+                    <option value="SEMAINE_2" {% if paiement.type_paiement == "SEMAINE_2" %}selected{% endif %}>Semaine 2</option>
+                    <option value="SEMAINE_3" {% if paiement.type_paiement == "SEMAINE_3" %}selected{% endif %}>Semaine 3</option>
+                    <option value="SEMAINE_4" {% if paiement.type_paiement == "SEMAINE_4" %}selected{% endif %}>Semaine 4</option>
+                    <option value="MENSUELLE" {% if paiement.type_paiement == "MENSUELLE" %}selected{% endif %}>Mois (Global)</option>
+                    <option value="ADHESION" {% if paiement.type_paiement == "ADHESION" %}selected{% endif %}>Frais d'Adhésion</option>
+                    <option value="ANNIVERSAIRE" {% if paiement.type_paiement == "ANNIVERSAIRE" %}selected{% endif %}>Anniversaire</option>
+                    <option value="VISITE" {% if paiement.type_paiement == "VISITE" %}selected{% endif %}>Visite</option>
+                    <option value="ACHAT_SUPPORT" {% if paiement.type_paiement == "ACHAT_SUPPORT" %}selected{% endif %}>Achat support</option>
+                    <option value="DA" {% if paiement.type_paiement == "DA" %}selected{% endif %}>D.A</option>
+                    <option value="PRATIQUE" {% if paiement.type_paiement == "PRATIQUE" %}selected{% endif %}>Pratique</option>
+                    <option value="AUTRE" {% if paiement.type_paiement == "AUTRE" %}selected{% endif %}>Autre Paiement</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label small fw-semibold">Commentaire (Optionnel)</label>
+                <textarea name="commentaire" class="form-control" rows="2">{{ paiement.commentaire }}</textarea>
+            </div>
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-indigo flex-grow-1">Enregistrer</button>
+                <a href="{% url 'comptes:tableau_de_bord' %}" class="btn btn-outline-secondary">Annuler</a>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

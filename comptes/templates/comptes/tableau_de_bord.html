@@ -1,0 +1,433 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr" data-bs-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portail Étudiant — L2 Gestion Informatique</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'comptes/css/style.css' %}">
+</head>
+<body class="bg-body-tertiary">
+
+    <!-- Navbar avec Switch Mode Sombre -->
+    <nav class="navbar navbar-expand-lg px-4 py-3 shadow-sm mb-4 bg-body border-bottom">
+        <div class="container-fluid">
+            <a class="navbar-brand fw-bold" href="#">
+                🎓 <span class="text-primary">Amis du Savoir</span> <span class="text-muted fw-normal fs-6">| L2 Gestion Informatique</span>
+            </a>
+            <div class="d-flex align-items-center gap-3">
+                <button class="btn btn-outline-secondary btn-sm rounded-pill px-3" onclick="toggleDarkMode()" id="darkModeBtn">🌙 Mode Sombre</button>
+                <span class="small">Connecté : <strong class="text-primary">{{ request.user.username }}</strong></span>
+                <form action="{% url 'comptes:deconnexion' %}" method="post" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-outline-danger btn-sm px-3 fw-semibold rounded-pill">Déconnexion</button>
+                </form>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container pb-5">
+        
+        <!-- Bandeau Flash Infos -->
+        {% for flash in flash_infos %}
+        <div class="alert alert-warning alert-dismissible fade show shadow-sm mb-4 border-start border-warning border-4" role="alert">
+            <strong>🔥 Flash Info : {{ flash.titre }}</strong> — {{ flash.contenu }}
+            {% if request.user.is_superuser %}
+                <a href="{% url 'comptes:supprimer_flash' flash.id %}" class="btn-close btn-sm float-end"></a>
+            {% endif %}
+        </div>
+        {% endfor %}
+
+        <!-- En-tête -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card p-4 border-0 shadow-sm bg-body">
+                    <h2 class="fw-bold mb-1">Portail Académique & Collaboratif</h2>
+                    <p class="text-muted mb-0">Gestion de la promotion, cours, bibliothèque, entraide et présences.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Caisse (Admin seulement) -->
+        {% if request.user.is_superuser %}
+        <div class="row mb-4">
+            <div class="col-md-4 mb-3">
+                <div class="card p-4 shadow-sm border-0 bg-body border-start border-success border-4">
+                    <span class="text-muted small fw-semibold text-uppercase">Total Recettes</span>
+                    <h3 class="fw-bold text-success mt-2 mb-0">{{ total_recettes }} FC</h3>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card p-4 shadow-sm border-0 bg-body border-start border-danger border-4">
+                    <span class="text-muted small fw-semibold text-uppercase">Total Dépenses</span>
+                    <h3 class="fw-bold text-danger mt-2 mb-0">{{ total_depenses }} FC</h3>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card p-4 shadow-sm border-0 bg-body border-start border-primary border-4">
+                    <span class="text-muted small fw-semibold text-uppercase">Solde Actuel</span>
+                    <h3 class="fw-bold text-primary mt-2 mb-0">{{ solde_caisse }} FC</h3>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="row">
+            <!-- Colonne Gauche -->
+            <div class="col-lg-8">
+                
+                <!-- Gestion Caisse & Dépenses (Admin) -->
+                {% if request.user.is_superuser %}
+                <div class="card border-0 shadow-sm mb-4 bg-body">
+                    <div class="card-header bg-transparent py-3 border-bottom">
+                        <h5 class="fw-bold m-0">💰 Gestion de la Caisse, Dépenses & Flash Infos</h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="row mb-4 g-3">
+                            <!-- Formulaire Paiement -->
+                            <div class="col-md-4">
+                                <form method="post" class="p-3 border rounded h-100">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="ajouter_paiement" value="1">
+                                    <h6 class="fw-bold text-success mb-2 small text-uppercase">+ Enregistrer Paiement</h6>
+                                    <select name="membre_id" class="form-select form-select-sm mb-2" required>
+                                        <option value="">Sélectionner membre</option>
+                                        {% for m in tous_les_membres %}<option value="{{ m.id }}">{{ m.username }}</option>{% endfor %}
+                                    </select>
+                                    <select name="type_paiement" class="form-select form-select-sm mb-2" required>
+                                        <option value="SEMAINE_1">Semaine 1</option>
+                                        <option value="SEMAINE_2">Semaine 2</option>
+                                        <option value="SEMAINE_3">Semaine 3</option>
+                                        <option value="SEMAINE_4">Semaine 4</option>
+                                        <option value="MENSUELLE">Mois (Global)</option>
+                                        <option value="ADHESION">Frais d'Adhésion</option>
+                                        <option value="ANNIVERSAIRE">🎂 Anniversaire</option>
+                                        <option value="VISITE">🤝 Visite</option>
+                                        <option value="ACHAT_SUPPORT">💻 Achat support</option>
+                                        <option value="DA">📄 D.A</option>
+                                        <option value="PRATIQUE">🛠️ Pratique</option>
+                                        <option value="AUTRE">Autre Paiement</option>
+                                    </select>
+                                    <input type="number" step="0.01" name="montant" class="form-control form-control-sm mb-2" placeholder="Montant FC" required>
+                                    <button type="submit" class="btn btn-success btn-sm w-100">Ajouter</button>
+                                </form>
+                            </div>
+
+                            <!-- Formulaire Dépense -->
+                            <div class="col-md-4">
+                                <form method="post" enctype="multipart/form-data" class="p-3 border rounded h-100">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="ajouter_depense" value="1">
+                                    <h6 class="fw-bold text-danger mb-2 small text-uppercase">- Enregistrer Dépense</h6>
+                                    <input type="text" name="titre_depense" class="form-control form-control-sm mb-2" placeholder="Motif (ex: Polycopiés)" required>
+                                    <input type="number" step="0.01" name="montant_depense" class="form-control form-control-sm mb-2" placeholder="Montant FC" required>
+                                    <input type="file" name="justificatif_depense" class="form-control form-control-sm mb-2" accept=".pdf,image/*">
+                                    <button type="submit" class="btn btn-danger btn-sm w-100">Ajouter Dépense</button>
+                                </form>
+                            </div>
+
+                            <!-- Formulaire Flash Info -->
+                            <div class="col-md-4">
+                                <form method="post" class="p-3 border rounded h-100">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="ajouter_flash" value="1">
+                                    <h6 class="fw-bold text-warning mb-2 small text-uppercase">⚡ Publier Flash Info</h6>
+                                    <input type="text" name="titre_flash" class="form-control form-control-sm mb-2" placeholder="Titre alerte" required>
+                                    <textarea name="contenu_flash" class="form-control form-control-sm mb-2" rows="2" placeholder="Message..." required></textarea>
+                                    <button type="submit" class="btn btn-warning btn-sm w-100 text-dark fw-semibold">Diffuser</button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- Tableau Suivi Cotisations -->
+                        <h6 class="fw-bold text-secondary mb-3">📊 Suivi des Cotisations par Membre</h6>
+                        <div class="table-responsive mb-4">
+                            <table class="table table-hover table-bordered align-middle text-center small">
+                                <thead class="table-dark">
+                                    <tr><th class="text-start">Membre</th><th>S. 1</th><th>S. 2</th><th>S. 3</th><th>S. 4</th><th>Total</th></tr>
+                                </thead>
+                                <tbody>
+                                    {% for m in membres_details %}
+                                    <tr>
+                                        <td class="text-start fw-semibold">{{ m.username }}</td>
+                                        <td>{{ m.semaine_1 }}</td><td>{{ m.semaine_2 }}</td><td>{{ m.semaine_3 }}</td><td>{{ m.semaine_4 }}</td>
+                                        <td class="fw-bold text-success">{{ m.total }} FC</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Tableau Historique des Dépenses -->
+                        <h6 class="fw-bold text-secondary mb-3">📉 Historique des Dépenses</h6>
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle small bg-body border">
+                                <thead class="table-light">
+                                    <tr><th>Motif</th><th>Montant</th><th>Date</th><th>Justificatif</th></tr>
+                                </thead>
+                                <tbody>
+                                    {% for dep in toutes_les_depenses %}
+                                    <tr>
+                                        <td><strong>{{ dep.titre }}</strong></td>
+                                        <td class="text-danger fw-bold">-{{ dep.montant }} FC</td>
+                                        <td class="text-muted">{{ dep.date_depense|date:"d/m/Y" }}</td>
+                                        <td>
+                                            {% if dep.justificatif %}
+                                                <a href="{{ dep.justificatif.url }}" class="btn btn-outline-secondary btn-sm py-0 px-2" target="_blank">Voir reçu</a>
+                                            {% else %}
+                                                <span class="text-muted">Aucun</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr><td colspan="4" class="text-center text-muted py-2">Aucune dépense enregistrée.</td></tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Section Annonces -->
+                <div class="card border-0 shadow-sm mb-4 bg-body">
+                    <div class="card-header bg-transparent py-3 border-bottom">
+                        <h5 class="fw-bold m-0">📢 Annonces Officielles</h5>
+                    </div>
+                    <div class="card-body p-4">
+                        {% if request.user.is_superuser %}
+                        <form method="post" class="p-3 border rounded mb-3">
+                            {% csrf_token %}
+                            <input type="hidden" name="ajouter_annonce" value="1">
+                            <input type="text" name="titre_annonce" class="form-control form-control-sm mb-2" placeholder="Titre de l'annonce" required>
+                            <textarea name="contenu_annonce" class="form-control form-control-sm mb-2" rows="2" placeholder="Contenu..." required></textarea>
+                            <button type="submit" class="btn btn-primary btn-sm w-100">Publier l'annonce</button>
+                        </form>
+                        {% endif %}
+                        <div class="d-flex flex-column gap-3">
+                            {% for annonce in annonces_univ %}
+                                <div class="p-3 border rounded">
+                                    <div class="d-flex justify-content-between mb-1">
+                                        <h6 class="fw-bold text-primary mb-0">{{ annonce.titre }}</h6>
+                                        <small class="text-muted">{{ annonce.date_publication|date:"d/m/Y" }}</small>
+                                    </div>
+                                    <p class="small mb-1">{{ annonce.contenu }}</p>
+                                    {% if request.user.is_superuser %}
+                                        <a href="{% url 'comptes:supprimer_annonce' annonce.id %}" class="text-danger small">Supprimer</a>
+                                    {% endif %}
+                                </div>
+                            {% empty %}
+                                <p class="text-muted small text-center">Aucune annonce.</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cours, TP & Exercices -->
+                <div class="card border-0 shadow-sm mb-4 bg-body">
+                    <div class="card-header bg-transparent py-3 border-bottom">
+                        <h5 class="fw-bold m-0">📚 Cours, TP & Exercices Partagés</h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <form method="post" enctype="multipart/form-data" class="p-3 border rounded mb-4">
+                            {% csrf_token %}
+                            <input type="hidden" name="ajouter_document" value="1">
+                            <div class="row g-2">
+                                <div class="col-md-5"><input type="text" name="titre_doc" class="form-control form-control-sm" placeholder="Titre" required></div>
+                                <div class="col-md-4">
+                                    <select name="categorie_doc" class="form-select form-select-sm" required>
+                                        <option value="COURS">Cours</option><option value="TP">TP</option><option value="EXERCICE">Exercice</option><option value="AUTRE">Autre</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3"><input type="file" name="fichier_doc" class="form-control form-control-sm" required></div>
+                                <div class="col-12 mt-2"><button type="submit" class="btn btn-primary btn-sm w-100">Publier le document</button></div>
+                            </div>
+                        </form>
+                        <div class="list-group">
+                            {% for doc in documents %}
+                                <div class="list-group-item d-flex justify-content-between align-items-center py-3 bg-transparent">
+                                    <div>
+                                        <span class="badge bg-secondary mb-1">{{ doc.get_categorie_display }}</span>
+                                        <h6 class="fw-bold mb-1">{{ doc.titre }}</h6>
+                                        <small class="text-muted">{{ doc.date_ajout|date:"d/m/Y H:i" }}</small>
+                                    </div>
+                                    <div class="d-flex gap-2">
+                                        <a href="{{ doc.fichier.url }}" class="btn btn-outline-primary btn-sm px-3" target="_blank">Télécharger</a>
+                                        {% if request.user.is_superuser %}
+                                            <a href="{% url 'comptes:supprimer_document' doc.id %}" class="btn btn-outline-danger btn-sm">×</a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            {% empty %}
+                                <p class="text-muted small text-center">Aucun document.</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bibliothèque Numérique -->
+                <div class="card border-0 shadow-sm mb-4 bg-body">
+                    <div class="card-header bg-transparent py-3 border-bottom">
+                        <h5 class="fw-bold m-0">📖 Bibliothèque Numérique & E-books</h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <form method="post" enctype="multipart/form-data" class="p-3 border rounded mb-3">
+                            {% csrf_token %}
+                            <input type="hidden" name="ajouter_livre" value="1">
+                            <div class="row g-2">
+                                <div class="col-md-6"><input type="text" name="titre_livre" class="form-control form-control-sm" placeholder="Titre du livre" required></div>
+                                <div class="col-md-6"><input type="text" name="auteur_livre" class="form-control form-control-sm" placeholder="Auteur"></div>
+                                <div class="col-12"><input type="file" name="fichier_livre" class="form-control form-control-sm" accept=".pdf,.epub" required></div>
+                                <div class="col-12"><button type="submit" class="btn btn-success btn-sm w-100">Ajouter à la bibliothèque</button></div>
+                            </div>
+                        </form>
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle small">
+                                <thead><tr><th>Titre / Auteur</th><th class="text-end">Action</th></tr></thead>
+                                <tbody>
+                                    {% for livre in livres_biblio %}
+                                    <tr>
+                                        <td><strong>{{ livre.titre }}</strong><br><span class="text-muted">{{ livre.auteur|default:"Inconnu" }}</span></td>
+                                        <td class="text-end">
+                                            <a href="{{ livre.fichier_livre.url }}" class="btn btn-outline-primary btn-sm py-0 px-2" target="_blank">Lire</a>
+                                            {% if request.user.is_superuser %}<a href="{% url 'comptes:supprimer_livre' livre.id %}" class="btn btn-outline-danger btn-sm py-0 px-1 ms-1">×</a>{% endif %}
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr><td colspan="2" class="text-center text-muted">Bibliothèque vide.</td></tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Colonne Droite : Profil, Galerie & Chat -->
+            <div class="col-lg-4">
+                
+                <!-- Mon Profil Étudiant -->
+                <div class="card border-0 shadow-sm mb-4 bg-body">
+                    <div class="card-header bg-transparent py-3 border-bottom">
+                        <h5 class="fw-bold m-0">👤 Mon Profil Étudiant (L2 GI)</h5>
+                    </div>
+                    <div class="card-body p-3">
+                        <form method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="modifier_profil" value="1">
+                            <div class="mb-2">
+                                <label class="small text-muted">Compétences (ex: Python, SQL)</label>
+                                <input type="text" name="competences" class="form-control form-control-sm" value="{{ profil.competences|default:'' }}">
+                            </div>
+                            <div class="mb-2">
+                                <label class="small text-muted">Téléphone / WhatsApp</label>
+                                <input type="text" name="telephone" class="form-control form-control-sm" value="{{ profil.telephone|default:'' }}">
+                            </div>
+                            <div class="mb-2">
+                                <label class="small text-muted">Bio / À propos</label>
+                                <textarea name="bio" class="form-control form-control-sm" rows="2">{{ profil.bio|default:'' }}</textarea>
+                            </div>
+                            <button type="submit" class="btn btn-outline-primary btn-sm w-100">Mettre à jour mon profil</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Annuaire des Experts -->
+                <div class="card border-0 shadow-sm mb-4 bg-body">
+                    <div class="card-header bg-transparent py-3 border-bottom">
+                        <h5 class="fw-bold m-0">🤝 Annuaire & Entraide Promo</h5>
+                    </div>
+                    <div class="card-body p-3" style="max-height: 250px; overflow-y: auto;">
+                        <div class="d-flex flex-column gap-2">
+                            {% for p in profils_etudiants %}
+                                <div class="p-2 border rounded small">
+                                    <strong>{{ p.user.username }}</strong>
+                                    {% if p.competences %}<br><span class="badge bg-info text-dark">🛠️ {{ p.competences }}</span>{% endif %}
+                                    {% if p.telephone %}<br><small class="text-muted">📞 {{ p.telephone }}</small>{% endif %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Galerie Photos -->
+                <div class="card border-0 shadow-sm mb-4 bg-body">
+                    <div class="card-header bg-transparent py-3 border-bottom">
+                        <h5 class="fw-bold m-0">📸 Galerie Photos</h5>
+                    </div>
+                    <div class="card-body p-3">
+                        <form method="post" enctype="multipart/form-data" class="mb-3 p-2 border rounded">
+                            {% csrf_token %}
+                            <input type="hidden" name="ajouter_photo" value="1">
+                            <input type="text" name="titre_photo" class="form-control form-control-sm mb-2" placeholder="Légende" required>
+                            <input type="file" name="image_photo" class="form-control form-control-sm mb-2" accept="image/*" required>
+                            <button type="submit" class="btn btn-primary btn-sm w-100">Ajouter</button>
+                        </form>
+                        <div class="row g-2" style="max-height: 200px; overflow-y: auto;">
+                            {% for photo in photos %}
+                                <div class="col-6">
+                                    <div class="card border shadow-sm h-100">
+                                        <img src="{{ photo.image.url }}" class="card-img-top" style="height: 90px; object-fit: cover;">
+                                        <div class="card-body p-1 text-center">
+                                            <small class="fw-semibold text-truncate d-block">{{ photo.titre }}</small>
+                                            {% if request.user.is_superuser %}<a href="{% url 'comptes:supprimer_photo' photo.id %}" class="text-danger" style="font-size: 0.75rem;">Supprimer</a>{% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            {% empty %}
+                                <p class="text-muted small text-center">Aucune photo.</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chat -->
+                <div class="card border-0 shadow-sm bg-body">
+                    <div class="card-header bg-transparent py-3 border-bottom">
+                        <h5 class="fw-bold m-0">💬 Espace de Discussion</h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="chat-box mb-3 d-flex flex-column gap-2" style="max-height: 220px; overflow-y: auto;">
+                            {% for msg in messages_chat %}
+                                <div class="p-2 rounded border small bg-body-tertiary">
+                                    <div class="d-flex justify-content-between">
+                                        <strong class="text-primary">{{ msg.expediteur.username }}</strong>
+                                        <small class="text-muted">{{ msg.date_envoi|date:"H:i" }}</small>
+                                    </div>
+                                    <p class="mb-0">{{ msg.texte }}</p>
+                                </div>
+                            {% empty %}
+                                <p class="text-muted small text-center">Aucun message.</p>
+                            {% endfor %}
+                        </div>
+                        <form method="post">
+                            {% csrf_token %}
+                            <div class="input-group">
+                                <input type="text" name="texte_message" class="form-control form-control-sm" placeholder="Message..." required>
+                                <button type="submit" class="btn btn-primary btn-sm">Envoyer</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Script pour le Mode Sombre -->
+    <script>
+        function toggleDarkMode() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-bs-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-bs-theme', newTheme);
+            document.getElementById('darkModeBtn').innerText = newTheme === 'dark' ? '☀️ Mode Clair' : '🌙 Mode Sombre';
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
