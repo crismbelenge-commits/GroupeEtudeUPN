@@ -90,7 +90,8 @@ class DocumentPartage(models.Model):
         max_length=20, choices=CategorieDoc.choices, default=CategorieDoc.COURS
     )
     description = models.TextField(blank=True, null=True)
-    fichier = models.FileField(upload_to="documents/")
+    fichier = models.FileField(upload_to="documents/", blank=True, null=True)
+    lien_externe = models.URLField(blank=True, null=True, help_text="Lien Google Drive optionnel")
     date_ajout = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -101,7 +102,8 @@ class LivreBibliotheque(models.Model):
     titre = models.CharField(max_length=200)
     auteur = models.CharField(max_length=150, blank=True, null=True)
     description = models.TextField(blank=True, null=True)
-    fichier_livre = models.FileField(upload_to="bibliotheque/")
+    fichier_livre = models.FileField(upload_to="bibliotheque/", blank=True, null=True)
+    lien_externe = models.URLField(blank=True, null=True, help_text="Lien Google Drive optionnel")
     date_ajout = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -126,7 +128,7 @@ class MessageChat(models.Model):
         return f"{self.expediteur.username}: {self.texte[:30]}"
 
     class Meta:
-        ordering = ["date_envoi"]  # Du plus ancien au plus récent pour le chat
+        ordering = ["date_envoi"]
 
 
 class TacheGroupe(models.Model):

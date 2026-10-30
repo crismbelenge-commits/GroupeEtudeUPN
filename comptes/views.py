@@ -121,9 +121,10 @@ def tableau_de_bord(request):
             titre = request.POST.get("titre_doc")
             categorie = request.POST.get("categorie_doc")
             fichier = request.FILES.get("fichier_doc")
-            if titre and fichier:
+            lien_externe = request.POST.get("lien_externe_doc", "")
+            if titre and (fichier or lien_externe):
                 DocumentPartage.objects.create(
-                    titre=titre, categorie=categorie, fichier=fichier
+                    titre=titre, categorie=categorie, fichier=fichier, lien_externe=lien_externe
                 )
             return redirect("comptes:tableau_de_bord")
 
@@ -131,9 +132,10 @@ def tableau_de_bord(request):
             titre = request.POST.get("titre_livre")
             auteur = request.POST.get("auteur_livre", "")
             fichier = request.FILES.get("fichier_livre")
-            if titre and fichier:
+            lien_externe = request.POST.get("lien_externe_livre", "")
+            if titre and (fichier or lien_externe):
                 LivreBibliotheque.objects.create(
-                    titre=titre, auteur=auteur, fichier_livre=fichier
+                    titre=titre, auteur=auteur, fichier_livre=fichier, lien_externe=lien_externe
                 )
             return redirect("comptes:tableau_de_bord")
 
