@@ -1,0 +1,21 @@
+{% extends 'comptes/base.html' %}  <!-- Adapte selon le nom de ton template de base -->
+
+{% block content %}
+<div class="container mt-5" style="max-width: 500px;">
+    <div class="card shadow-sm p-4">
+        <h3 class="mb-3 text-center">🔐 Modifier mon mot de passe</h3>
+        
+        <form method="POST">
+            {% csrf_token %}
+            
+            {{ form.as_p }}
+            
+            <button type="submit" class="btn btn-primary w-100 mt-3">Enregistrer le nouveau mot de passe</button>
+        </form>
+        
+        <div class="text-center mt-3">
+            <a href="{% url 'comptes:tableau_de_bord' %}" class="text-decoration-none">Retour au tableau de bord</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
