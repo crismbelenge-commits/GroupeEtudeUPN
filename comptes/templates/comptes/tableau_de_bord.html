@@ -276,13 +276,14 @@
                             {% csrf_token %}
                             <input type="hidden" name="ajouter_document" value="1">
                             <div class="row g-2">
-                                <div class="col-md-5"><input type="text" name="titre_doc" class="form-control form-control-sm" placeholder="Titre" required></div>
-                                <div class="col-md-4">
+                                <div class="col-md-6"><input type="text" name="titre_doc" class="form-control form-control-sm" placeholder="Titre" required></div>
+                                <div class="col-md-6">
                                     <select name="categorie_doc" class="form-select form-select-sm" required>
                                         <option value="COURS">Cours</option><option value="TP">TP</option><option value="EXERCICE">Exercice</option><option value="AUTRE">Autre</option>
                                     </select>
                                 </div>
-                                <div class="col-md-3"><input type="file" name="fichier_doc" class="form-control form-control-sm" required></div>
+                                <div class="col-12"><input type="url" name="lien_externe_doc" class="form-control form-control-sm" placeholder="🔗 Ou coller un lien Google Drive (Optionnel)"></div>
+                                <div class="col-12"><input type="file" name="fichier_doc" class="form-control form-control-sm"></div>
                                 <div class="col-12 mt-2"><button type="submit" class="btn btn-primary btn-sm w-100">Publier le document</button></div>
                             </div>
                         </form>
@@ -295,7 +296,11 @@
                                         <small class="text-muted">{{ doc.date_ajout|date:"d/m/Y H:i" }}</small>
                                     </div>
                                     <div class="d-flex gap-2">
-                                        <a href="{{ doc.fichier.url }}" class="btn btn-outline-primary btn-sm px-3" target="_blank">Télécharger</a>
+                                        {% if doc.lien_externe %}
+                                            <a href="{{ doc.lien_externe }}" class="btn btn-outline-success btn-sm px-3" target="_blank">Ouvrir (Drive)</a>
+                                        {% elif doc.fichier %}
+                                            <a href="{{ doc.fichier.url }}" class="btn btn-outline-primary btn-sm px-3" target="_blank">Télécharger</a>
+                                        {% endif %}
                                         {% if request.user.is_superuser %}
                                             <a href="{% url 'comptes:supprimer_document' doc.id %}" class="btn btn-outline-danger btn-sm">×</a>
                                         {% endif %}
@@ -320,7 +325,8 @@
                             <div class="row g-2">
                                 <div class="col-md-6"><input type="text" name="titre_livre" class="form-control form-control-sm" placeholder="Titre du livre" required></div>
                                 <div class="col-md-6"><input type="text" name="auteur_livre" class="form-control form-control-sm" placeholder="Auteur"></div>
-                                <div class="col-12"><input type="file" name="fichier_livre" class="form-control form-control-sm" accept=".pdf,.epub" required></div>
+                                <div class="col-12"><input type="url" name="lien_externe_livre" class="form-control form-control-sm" placeholder="🔗 Ou coller un lien Google Drive (Optionnel)"></div>
+                                <div class="col-12"><input type="file" name="fichier_livre" class="form-control form-control-sm" accept=".pdf,.epub"></div>
                                 <div class="col-12"><button type="submit" class="btn btn-success btn-sm w-100">Ajouter à la bibliothèque</button></div>
                             </div>
                         </form>
@@ -332,7 +338,11 @@
                                     <tr>
                                         <td><strong>{{ livre.titre }}</strong><br><span class="text-muted">{{ livre.auteur|default:"Inconnu" }}</span></td>
                                         <td class="text-end">
-                                            <a href="{{ livre.fichier_livre.url }}" class="btn btn-outline-primary btn-sm py-0 px-2" target="_blank">Lire</a>
+                                            {% if livre.lien_externe %}
+                                                <a href="{{ livre.lien_externe }}" class="btn btn-outline-success btn-sm py-0 px-2" target="_blank">Ouvrir (Drive)</a>
+                                            {% elif livre.fichier_livre %}
+                                                <a href="{{ livre.fichier_livre.url }}" class="btn btn-outline-primary btn-sm py-0 px-2" target="_blank">Lire</a>
+                                            {% endif %}
                                             {% if request.user.is_superuser %}<a href="{% url 'comptes:supprimer_livre' livre.id %}" class="btn btn-outline-danger btn-sm py-0 px-1 ms-1">×</a>{% endif %}
                                         </td>
                                     </tr>
