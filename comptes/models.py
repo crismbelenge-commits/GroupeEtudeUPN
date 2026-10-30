@@ -125,6 +125,9 @@ class MessageChat(models.Model):
     def __str__(self):
         return f"{self.expediteur.username}: {self.texte[:30]}"
 
+    class Meta:
+        ordering = ["date_envoi"]  # Du plus ancien au plus récent pour le chat
+
 
 class TacheGroupe(models.Model):
     titre = models.CharField(max_length=200)
