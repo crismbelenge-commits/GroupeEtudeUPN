@@ -42,24 +42,18 @@ def demander_inscription(request):
 def valider_demande(request, demande_id):
   if request.user.is_superuser:
     demande = get_object_or_404(DemandeInscription, id=demande_id)
-
-    # 1. Valider la demande
     demande.statut = DemandeInscription.Statut.ACCEPTEE
     demande.validee = True
     demande.save()
 
-    # 2. Générer un mot de passe provisoire (ex: L2GI-4819)
     mot_de_passe_provisoire = "L2GI-" + "".join(
         random.choices(string.digits, k=4)
     )
-
-    # 3. Définir l'identifiant (username) basé sur le nom
     username_compte = (
         getattr(demande, "identifiant", None)
         or demande.nom.lower().replace(" ", "")
     )
 
-    # 4. Créer automatiquement le compte utilisateur Django s'il n'existe pas
     if not User.objects.filter(username=username_compte).exists():
       user = User.objects.create_user(
           username=username_compte,
@@ -71,13 +65,11 @@ def valider_demande(request, demande_id):
       user.last_name = parts[1] if len(parts) > 1 else ""
       user.save()
 
-      # 5. Afficher un message vert avec le Nom, l'Identifiant et le Mot de passe
       messages.success(
           request,
-          f"✅ Compte créé avec succès ! "
-          f"Nom : {demande.nom} | "
-          f"Identifiant : {username_compte} | "
-          f"Mot de passe provisoire : {mot_de_passe_provisoire}",
+          f"✅ Compte créé avec succès ! Nom : {demande.nom} | Identifiant :"
+          f" {username_compte} | Mot de passe provisoire :"
+          f" {mot_de_passe_provisoire}",
       )
     else:
       messages.warning(
@@ -246,7 +238,6 @@ def tableau_de_bord(request):
     tous_les_paiements = PaiementCaisse.objects.all()
     toutes_les_depenses = DepenseCaisse.objects.all().order_by("-date_depense")
     
-    # Récupération des autres paiements (hors semaines et mensuel) pour le tableau 2
     autres_paiements_liste = PaiementCaisse.objects.exclude(
         type_paiement__in=[
             PaiementCaisse.TypePaiement.SEMAINE_1,
