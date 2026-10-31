@@ -123,6 +123,12 @@ class MessageChat(models.Model):
     expediteur = models.ForeignKey(User, on_delete=models.CASCADE)
     texte = models.TextField()
     date_envoi = models.DateTimeField(auto_now_add=True)
+    
+    # Nouveaux champs pour joindre un fichier et répondre directement à un message
+    fichier = models.FileField(upload_to="chat_fichiers/", blank=True, null=True)
+    reponse_a = models.ForeignKey(
+        'self', on_delete=models.SET_NULL, null=True, blank=True, related_name='reponses'
+    )
 
     def __str__(self):
         return f"{self.expediteur.username}: {self.texte[:30]}"

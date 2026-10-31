@@ -196,10 +196,23 @@ def tableau_de_bord(request):
         PhotoGalerie.objects.create(titre=titre, image=image)
       return redirect("comptes:tableau_de_bord")
 
-    elif "texte_message" in request.POST:
+    elif "envoyer_message_chat" in request.POST:
       texte = request.POST.get("texte_message")
-      if texte and texte.strip():
-        MessageChat.objects.create(expediteur=request.user, texte=texte)
+      fichier = request.FILES.get("fichier_chat")
+      parent_id = request.POST.get("parent_id")
+
+      message_parent = None
+      if parent_id:
+        message_parent = MessageChat.objects.filter(id=parent_id).first()
+
+      if (texte and texte.strip()) or fichier:
+        MessageChat.objects.create(
+            expediteur=request.user,
+            texte=texte if texte else "",
+            fichier=fichier,
+            reponse_a=message_parent,
+        )
+      return redirect("comptes:tableau_de_bord")
 
     elif "titre_tache" in request.POST:
       titre_tache = request.POST.get("titre_tache")
@@ -232,6 +245,18 @@ def tableau_de_bord(request):
   if request.user.is_superuser:
     tous_les_paiements = PaiementCaisse.objects.all()
     toutes_les_depenses = DepenseCaisse.objects.all().order_by("-date_depense")
+    
+    # Récupération des autres paiements (hors semaines et mensuel) pour le tableau 2
+    autres_paiements_liste = PaiementCaisse.objects.exclude(
+        type_paiement__in=[
+            PaiementCaisse.TypePaiement.SEMAINE_1,
+            PaiementCaisse.TypePaiement.SEMAINE_2,
+            PaiementCaisse.TypePaiement.SEMAINE_3,
+            PaiementCaisse.TypePaiement.SEMAINE_4,
+            PaiementCaisse.TypePaiement.COTISATION_MENSUELLE,
+        ]
+    ).order_by("-date_paiement")
+
     membres_details = []
     for m in User.objects.all():
       s1 = (
@@ -281,6 +306,7 @@ def tableau_de_bord(request):
         {
             "tous_les_paiements": tous_les_paiements,
             "toutes_les_depenses": toutes_les_depenses,
+            "autres_paiements_liste": autres_paiements_liste,
             "membres_details": membres_details,
             "total_recettes": total_rec,
             "total_depenses": total_dep,
