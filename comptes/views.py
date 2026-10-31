@@ -92,6 +92,28 @@ def refuser_demande(request, demande_id):
 
 
 @login_required(login_url="comptes:connexion")
+def envoyer_message_chat(request):
+  """Vue dédiée et ultra-rapide pour traiter l'envoi de messages et fichiers du chat"""
+  if request.method == "POST":
+    texte = request.POST.get("texte_message")
+    fichier = request.FILES.get("fichier_chat")
+    parent_id = request.POST.get("parent_id")
+
+    message_parent = None
+    if parent_id:
+      message_parent = MessageChat.objects.filter(id=parent_id).first()
+
+    if (texte and texte.strip()) or fichier:
+      MessageChat.objects.create(
+          expediteur=request.user,
+          texte=texte if texte else "",
+          fichier=fichier,
+          reponse_a=message_parent,
+      )
+  return redirect("comptes:tableau_de_bord")
+
+
+@login_required(login_url="comptes:connexion")
 def tableau_de_bord(request):
   profil, _ = ProfilEtudiant.objects.get_or_create(user=request.user)
 
@@ -186,24 +208,6 @@ def tableau_de_bord(request):
       image = request.FILES.get("image_photo")
       if titre and image:
         PhotoGalerie.objects.create(titre=titre, image=image)
-      return redirect("comptes:tableau_de_bord")
-
-    elif "envoyer_message_chat" in request.POST:
-      texte = request.POST.get("texte_message")
-      fichier = request.FILES.get("fichier_chat")
-      parent_id = request.POST.get("parent_id")
-
-      message_parent = None
-      if parent_id:
-        message_parent = MessageChat.objects.filter(id=parent_id).first()
-
-      if (texte and texte.strip()) or fichier:
-        MessageChat.objects.create(
-            expediteur=request.user,
-            texte=texte if texte else "",
-            fichier=fichier,
-            reponse_a=message_parent,
-        )
       return redirect("comptes:tableau_de_bord")
 
     elif "titre_tache" in request.POST:

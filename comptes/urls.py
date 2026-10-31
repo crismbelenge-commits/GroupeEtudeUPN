@@ -22,6 +22,9 @@ urlpatterns = [
     path("inscription/", views.demander_inscription, name="demander_inscription"),
     path("tableau-de-bord/", views.tableau_de_bord, name="tableau_de_bord"),
     
+    # ➔ Route dédiée pour envoyer un message ou un fichier dans le chat :
+    path("chat/envoyer/", views.envoyer_message_chat, name="envoyer_message_chat"),
+    
     # Routes de validation des inscriptions
     path(
         "demande/valider/<int:demande_id>/",

@@ -507,10 +507,9 @@
                             {% endfor %}
                         </div>
 
-                        <!-- Formulaire d'envoi avec support enctype pour les fichiers -->
-                        <form method="post" enctype="multipart/form-data">
+                        <!-- Formulaire d'envoi pointant directement vers la vue dédiée du chat -->
+                        <form method="post" enctype="multipart/form-data" action="{% url 'comptes:envoyer_message_chat' %}">
                             {% csrf_token %}
-                            <input type="hidden" name="envoyer_message_chat" value="1">
                             <input type="hidden" name="parent_id" id="parent_id">
 
                             <!-- Aperçu si on répond à quelqu'un -->
@@ -519,7 +518,7 @@
                                 <button type="button" class="btn-close btn-sm float-end" onclick="annulerReponse()"></button>
                             </div>
 
-                            <!-- Zone de texte agrandie (rows="4") SANS required pour éviter le blocage -->
+                            <!-- Zone de texte agrandie (rows="4") SANS required -->
                             <div class="mb-2">
                                 <textarea name="texte_message" rows="4" class="form-control form-control-sm" placeholder="Écris ton message ou ta réponse ici..."></textarea>
                             </div>
