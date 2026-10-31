@@ -10,8 +10,7 @@ SECRET_KEY = 'django-insecure-remplace-cette-cle-par-une-vraie-en-production'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['groupeetudeupn.onrender.com', 'localhost', '127.0.0.1']
-
+ALLOWED_HOSTS = ["groupeetudeupn-1.onrender.com", "localhost", "127.0.0.1"]
 # Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
